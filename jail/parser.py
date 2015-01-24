@@ -1,11 +1,15 @@
+import re
+
 NO_MODE = 0
 STRING_MODE = 1
 
 
 def get_jails_config(filename='jail.conf'):
-    with open(filename, 'r') as f:
-        cfg = _remove_comments(f.read())
-
+    cfg = None
+    try:
+        with open(filename, 'r') as f:
+            cfg = _remove_comments(f.read())
+    finally:
         return cfg
 
 
@@ -26,6 +30,7 @@ def _remove_comments(cfg):
                 while cfg[curr_c:curr_c+2] != "*/":
                     curr_c += 1
                 curr_c += 2  # remove "*/" trailing characters
+            # simple line / character
             else:
                 # enter in string mode -> keep all characters
                 if cfg[curr_c] == '"':
