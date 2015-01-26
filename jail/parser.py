@@ -1,14 +1,35 @@
 import re
 
+NO_MODE_CHARS = "[a-zA-Z0-9_\.\"-]"
+
 NO_MODE = 0
 STRING_MODE = 1
 
 
 def get_jails_config(filename='jail.conf'):
-    cfg = None
+    cfg = []
     try:
         with open(filename, 'r') as f:
-            cfg = _remove_comments(f.read())
+            cfg_content = _remove_comments(f.read())
+
+            curr_c = 0
+            cfg_nb_c = len(cfg_content)
+
+            # parse all file content
+            while curr_c < cfg_nb_c:
+                # by default, parameters are in global jail definition
+                curr_c, data = _parse_section_content(jail_name='global',
+                                                      start_pos=curr_c,
+                                                      cfg=cfg_content)
+                if data is not None:
+                    if isinstance(data, list):
+                        for _ in data:
+                            cfg.append(_)
+                    else:
+                        cfg.append(data)
+                curr_c += 1
+    except Exception as e:
+        print(str(e))
     finally:
         return cfg
 
@@ -48,3 +69,112 @@ def _remove_comments(cfg):
             curr_c += 1
 
     return cfg_structure
+
+
+def _get_param(start_pos, cfg):
+    mode = 0
+    val = ""
+
+    curr_c = start_pos - 1
+    # Remove trailing whitespaces
+    while len(cfg[curr_c].strip()) == 0:
+        curr_c -= 1
+
+    while curr_c >= 0:
+        if (mode == NO_MODE
+                and (len(cfg[curr_c].strip()) == 0 or cfg[curr_c] == ';')):
+            break
+        else:
+            val += cfg[curr_c]
+            curr_c -= 1
+
+    return (start_pos, val[::-1])
+
+
+def _get_value(start_pos, cfg):
+    mode = 0
+    val = ""
+
+    curr_c = start_pos + 1
+    # Remove begining whitespaces
+    while len(cfg[curr_c].strip()) == 0:
+        curr_c += 1
+
+    while True:
+        # each instruction ends with a ';'
+        if mode == NO_MODE and cfg[curr_c] == ';':
+            # end of an instruction, exit loop without keeping end of
+            # instruction character
+            break
+        else:
+            # enter or exit string mode
+            if cfg[curr_c] == '"':
+                if mode == NO_MODE:
+                    mode = STRING_MODE
+                else:
+                    mode = NO_MODE
+
+            if (mode == STRING_MODE or
+                    (mode == NO_MODE and re.match(NO_MODE_CHARS, cfg[curr_c]))):
+                val += cfg[curr_c]
+            curr_c += 1
+
+    return (curr_c, val)
+
+
+def _parse_jail_definition(start_pos, cfg):
+    mode = 0
+    val = None
+
+    _, jailname = _get_param(start_pos, cfg)
+
+    jaildef = ""
+    curr_c = start_pos + 1
+    # get the content of the jail definition part
+    while True:
+        # a jail definition ands with a '}'
+        if mode == NO_MODE and cfg[curr_c] == '}':
+            break
+        else:
+            # enter or exit string mode
+            if cfg[curr_c] == '"':
+                if mode == NO_MODE:
+                    mode = STRING_MODE
+                else:
+                    mode = NO_MODE
+            jaildef += cfg[curr_c]
+            curr_c += 1
+
+    _curr_c = 0
+    jaildef_nb_c = len(jaildef)
+
+    # parse the content of jail definition part
+    while _curr_c < jaildef_nb_c:
+        _curr_c, data = _parse_section_content(jail_name=jailname,
+                                               start_pos=_curr_c,
+                                               cfg=jaildef)
+
+        if data is not None:
+            if val is None:
+                val = []
+            val.append(data)
+
+        _curr_c += 1
+
+    return (curr_c, val)
+
+def _parse_section_content(jail_name, start_pos, cfg):
+    val = None
+
+    curr_c = start_pos
+    # It seems to be a 'param = "value";' component
+    if cfg[curr_c] == '=':
+        _, param_name = _get_param(curr_c, cfg)
+        curr_c, param_value = _get_value(curr_c, cfg)
+
+        val = (jail_name, param_name, param_value)
+    # begining of a jail definition
+    elif cfg[curr_c] == '{':
+        curr_c, val = _parse_jail_definition(curr_c, cfg)
+
+    return (curr_c, val)
