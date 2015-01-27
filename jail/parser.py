@@ -28,6 +28,13 @@ def get_jails_config(filename='jail.conf'):
                     else:
                         cfg.append(data)
                 curr_c += 1
+
+            jailscfg = {}
+            for jailname, p_name, p_value in cfg:
+                if jailname not in jailscfg:
+                    jailscfg[jailname] = []
+                jailscfg[jailname].append((p_name, p_value))
+            cfg = jailscfg
     except Exception as e:
         print(str(e))
     finally:
@@ -162,6 +169,7 @@ def _parse_jail_definition(start_pos, cfg):
         _curr_c += 1
 
     return (curr_c, val)
+
 
 def _parse_section_content(jail_name, start_pos, cfg):
     val = None
