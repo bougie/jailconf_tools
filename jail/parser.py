@@ -1,6 +1,6 @@
 import re
 
-NO_MODE_CHARS = "[a-zA-Z0-9_\.\"'-]"
+NO_MODE_CHARS = "[a-zA-Z0-9_\.\"'\{\};=+-]"
 
 NO_MODE = 0
 S_STRING_MODE = 1
@@ -116,7 +116,7 @@ def _get_value(start_pos, cfg):
             # instruction character
             break
         else:
-            _mode, _val = _set_value_by_mode(mode, cfg, curr_c)
+            _mode, _val = _get_value_by_mode(mode, cfg, curr_c)
             if _mode is not None and _val is not None:
                 val += _val
                 mode = _mode
@@ -125,7 +125,7 @@ def _get_value(start_pos, cfg):
     return (curr_c, val)
 
 
-def _set_value_by_mode(mode, cfg, pos):
+def _get_value_by_mode(mode, cfg, pos):
     # enter or exit string mode
     if cfg[pos] in ['"', "'"]:
         if mode == NO_MODE and cfg[pos] == '"':
@@ -161,13 +161,11 @@ def _parse_jail_definition(start_pos, cfg):
         if mode == NO_MODE and cfg[curr_c] == '}':
             break
         else:
-            # enter or exit string mode
-            if cfg[curr_c] == '"':
-                if mode == NO_MODE:
-                    mode = D_STRING_MODE
-                else:
-                    mode = NO_MODE
-            jaildef += cfg[curr_c]
+            _mode, _val = _get_value_by_mode(mode, cfg, curr_c)
+            print((_mode, _val))
+            if _mode is not None and _val is not None:
+                jaildef += _val
+                mode = _mode
             curr_c += 1
 
     _curr_c = 0
