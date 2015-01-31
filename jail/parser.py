@@ -162,7 +162,6 @@ def _parse_jail_definition(start_pos, cfg):
             break
         else:
             _mode, _val = _get_value_by_mode(mode, cfg, curr_c)
-            print((_mode, _val))
             if _mode is not None and _val is not None:
                 jaildef += _val
                 mode = _mode
