@@ -1,9 +1,10 @@
 import re
 
-NO_MODE_CHARS = "[a-zA-Z0-9_\.\"-]"
+NO_MODE_CHARS = "[a-zA-Z0-9_\.\"'-]"
 
 NO_MODE = 0
-STRING_MODE = 1
+S_STRING_MODE = 1
+D_STRING_MODE = 2
 
 
 def get_jails_config(filename='jail.conf'):
@@ -27,6 +28,7 @@ def get_jails_config(filename='jail.conf'):
                             cfg.append(_)
                     else:
                         cfg.append(data)
+
                 curr_c += 1
 
             jailscfg = {}
@@ -62,7 +64,7 @@ def _remove_comments(cfg):
             else:
                 # enter in string mode -> keep all characters
                 if cfg[curr_c] == '"':
-                    curr_mode = STRING_MODE
+                    curr_mode = D_STRING_MODE
 
                 cfg_structure += cfg[curr_c]
                 curr_c += 1
@@ -115,15 +117,22 @@ def _get_value(start_pos, cfg):
             break
         else:
             # enter or exit string mode
-            if cfg[curr_c] == '"':
-                if mode == NO_MODE:
-                    mode = STRING_MODE
-                else:
+            if cfg[curr_c] in ['"', "'"]:
+                if mode == NO_MODE and cfg[curr_c] == '"':
+                    mode = D_STRING_MODE
+                elif mode == NO_MODE and cfg[curr_c] == "'":
+                    mode = S_STRING_MODE
+                elif (mode == D_STRING_MODE and cfg[curr_c] == '"'
+                        and cfg[curr_c-1] != '\\'):
+                    mode = NO_MODE
+                elif (mode == S_STRING_MODE and cfg[curr_c] == "'"
+                        and cfg[curr_c-1] != '\\'):
                     mode = NO_MODE
 
-            if (mode == STRING_MODE or
+            if (mode in [S_STRING_MODE, D_STRING_MODE] or
                     (mode == NO_MODE and re.match(NO_MODE_CHARS, cfg[curr_c]))):
-                val += cfg[curr_c]
+                if cfg[curr_c] != '\\':
+                    val += cfg[curr_c]
             curr_c += 1
 
     return (curr_c, val)
@@ -146,7 +155,7 @@ def _parse_jail_definition(start_pos, cfg):
             # enter or exit string mode
             if cfg[curr_c] == '"':
                 if mode == NO_MODE:
-                    mode = STRING_MODE
+                    mode = D_STRING_MODE
                 else:
                     mode = NO_MODE
             jaildef += cfg[curr_c]
