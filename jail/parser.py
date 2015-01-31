@@ -122,6 +122,11 @@ def _get_value(start_pos, cfg):
                 mode = _mode
             curr_c += 1
 
+    for quote_c in ['"', "'"]:
+        if val.startswith(quote_c) and val.endswith(quote_c):
+            val = val[1:len(val)-1]
+            break
+
     return (curr_c, val)
 
 
