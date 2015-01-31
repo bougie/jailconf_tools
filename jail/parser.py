@@ -116,26 +116,35 @@ def _get_value(start_pos, cfg):
             # instruction character
             break
         else:
-            # enter or exit string mode
-            if cfg[curr_c] in ['"', "'"]:
-                if mode == NO_MODE and cfg[curr_c] == '"':
-                    mode = D_STRING_MODE
-                elif mode == NO_MODE and cfg[curr_c] == "'":
-                    mode = S_STRING_MODE
-                elif (mode == D_STRING_MODE and cfg[curr_c] == '"'
-                        and cfg[curr_c-1] != '\\'):
-                    mode = NO_MODE
-                elif (mode == S_STRING_MODE and cfg[curr_c] == "'"
-                        and cfg[curr_c-1] != '\\'):
-                    mode = NO_MODE
-
-            if (mode in [S_STRING_MODE, D_STRING_MODE] or
-                    (mode == NO_MODE and re.match(NO_MODE_CHARS, cfg[curr_c]))):
-                if cfg[curr_c] != '\\':
-                    val += cfg[curr_c]
+            _mode, _val = _set_value_by_mode(mode, cfg, curr_c)
+            if _mode is not None and _val is not None:
+                val += _val
+                mode = _mode
             curr_c += 1
 
     return (curr_c, val)
+
+
+def _set_value_by_mode(mode, cfg, pos):
+    # enter or exit string mode
+    if cfg[pos] in ['"', "'"]:
+        if mode == NO_MODE and cfg[pos] == '"':
+            mode = D_STRING_MODE
+        elif mode == NO_MODE and cfg[pos] == "'":
+            mode = S_STRING_MODE
+        elif (mode == D_STRING_MODE and cfg[pos] == '"'
+                and cfg[pos-1] != '\\'):
+            mode = NO_MODE
+        elif (mode == S_STRING_MODE and cfg[pos] == "'"
+                and cfg[pos-1] != '\\'):
+            mode = NO_MODE
+
+    if (mode in [S_STRING_MODE, D_STRING_MODE] or
+            (mode == NO_MODE and re.match(NO_MODE_CHARS, cfg[pos]))):
+        if cfg[pos] != '\\':
+            return (mode, cfg[pos])
+
+    return (None, None)
 
 
 def _parse_jail_definition(start_pos, cfg):
