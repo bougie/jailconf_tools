@@ -204,5 +204,10 @@ def _parse_section_content(jail_name, start_pos, cfg):
     # begining of a jail definition
     elif cfg[curr_c] == '{':
         curr_c, val = _parse_jail_definition(curr_c, cfg)
+    # it seems to be a boolean param
+    elif cfg[curr_c] == ';':
+        _, param_name = _get_param(curr_c, cfg)
+
+        val = (jail_name, param_name, None)
 
     return (curr_c, val)
