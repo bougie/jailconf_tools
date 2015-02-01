@@ -85,6 +85,10 @@ def _get_param(start_pos, cfg):
     val = ""
 
     curr_c = start_pos - 1
+
+    if cfg[curr_c] == '+':
+        curr_c -= 1
+
     # Remove trailing whitespaces
     while len(cfg[curr_c].strip()) == 0:
         curr_c -= 1
