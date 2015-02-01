@@ -122,8 +122,13 @@ def _get_value(start_pos, cfg):
         else:
             _mode, _val = _get_value_by_mode(mode, cfg, curr_c)
             if _mode is not None and _val is not None:
-                val += _val
-                mode = _mode
+                if _val != '\\' and cfg[curr_c+1] != '\n':
+                    val += _val
+                    mode = _mode
+                # \ is the last character on the line, so escape it and the
+                # new line character too
+                else:
+                    curr_c += 1
             curr_c += 1
 
     for quote_c in ['"', "'"]:
