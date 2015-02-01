@@ -1,6 +1,6 @@
 import re
 
-NO_MODE_CHARS = "[a-zA-Z0-9_\.\"'\{\};=+-]"
+NO_MODE_CHARS = "[a-zA-Z0-9_\.,\"'\{\};=+/\$-]"
 
 NO_MODE = 0
 S_STRING_MODE = 1
