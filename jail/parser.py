@@ -8,6 +8,11 @@ D_STRING_MODE = 2
 
 
 def get_jails_config(filename='jail.conf'):
+    """Parse file `filename` and get it content as a dict
+
+    :param filename: path to jail.conf file
+    :type filename: str"""
+
     cfg = []
     try:
         with open(filename, 'r') as f:
