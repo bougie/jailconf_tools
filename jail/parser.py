@@ -49,6 +49,11 @@ def get_jails_config(filename='jail.conf'):
 
 
 def _remove_comments(cfg):
+    """Remove comments from `cfg` string
+
+    :param cfg: string containing comments
+    :type cfg: str"""
+
     cfg_structure = ""
     curr_mode = NO_MODE
     curr_c = 0
