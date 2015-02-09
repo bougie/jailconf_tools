@@ -91,6 +91,13 @@ def _remove_comments(cfg):
 
 
 def _get_param(start_pos, cfg):
+    """Get parameter name which ends at character `start_pos`
+
+    :param start_pos:
+    :type start_pos: interger
+    :param cfg:
+    :type cfg: str"""
+
     mode = 0
     val = ""
 
@@ -115,6 +122,14 @@ def _get_param(start_pos, cfg):
 
 
 def _get_value(start_pos, cfg):
+    """Get value which starts at character `start_pos` and end at the ';'
+    character
+
+    :param start_pos:
+    :type start_pos: interger
+    :param cfg:
+    :type cfg: str"""
+
     mode = 0
     val = ""
 
