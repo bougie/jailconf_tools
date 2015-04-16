@@ -1,4 +1,6 @@
-*.pyc
+.pyc
 docs/_*
 __pycache__
-.ropeproject/
+.ropeproject
+pyezjail.py
+jail.conf
