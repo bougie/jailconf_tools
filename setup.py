@@ -6,8 +6,9 @@ def readme():
         return f.read()
 
 setup(name='jailconf_tools',
-      version='1.0',
-      description="""""",
+      version='1.0.1',
+      description="""A jail.conf python library to help making administration
+ software""",
       long_description=readme(),
       classifiers=['Development Status :: 4 - Beta',
                    'Topic :: Text Processing :: Markup',
