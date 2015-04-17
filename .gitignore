@@ -4,3 +4,7 @@ __pycache__
 .ropeproject
 pyezjail.py
 jail.conf
+/dist/
+/build/
+/*.egg-info
+/*.egg
